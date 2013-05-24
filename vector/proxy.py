@@ -50,18 +50,28 @@ class ProxyNode(object):
     def __len__(self):
         return len(self.vals)
     def __add__(self, other):
+        if other == 0:
+            return self
         return ProxyNode("+", self, other)
     def __radd__(self, scalar):
         return self + scalar
     def __sub__(self, other):
+        if other == 0:
+            return self
         return ProxyNode("-", self, other)
     def __rsub__(self, scalar):
+        if other == 0:
+            return self
         return ProxyNode("-", scalar, self)
     def __mul__(self, other):
+        if other == 1:
+            return self
         return ProxyNode("*", self, other)
     def __neg__(self):
         return self * -1
     def __div__(self, other):
+        if other == 1:
+            return self
         return ProxyNode("/", self, other)
     def __rdiv__(self, other):
         return ProxyNode("/", other, self)
@@ -70,8 +80,28 @@ class ProxyNode(object):
     def __str__(self):
         return self.__repr__()
     def __repr__(self):
-        return "(%s)%s(%s)" % (str(self.left), self.oper, str(self.right))
+        values = (str(self.left), self.oper, str(self.right))
+        #print [type(self.left), type(self), type(self.right)]
+        if isinstance(self.left, Proxy):
+            if isinstance(self.right, Proxy):
+                return "%s%s%s" % values
+            else:
+                if isinstance(self.right, ProxyNode):
+                    if self.right.oper == self.oper:
+                        return "%s%s%s" % values
+                    else:
+                        return "%s%s(%s)" % values
+                else:
+                    return "%s%s%s" % values
+        else:
+            if isinstance(self.left, ProxyNode) and self.left.oper == self.oper:
+                return "%s%s%s" % values
+        return "(%s)%s(%s)" % values
     def __rpow__(self, base):
+        if other == 1:
+            return self
+        elif other == -1:
+            return 1 / self 
         return ProxyNode("^", base, self)
     def __pow__(self, n):
         return ProxyNode("^", self, n)
@@ -87,6 +117,7 @@ class ProxyNode(object):
 class Proxy(ProxyNode):
     def __init__(self, initial):
         self.initial = initial
+        self.oper = None
     def __repr__(self):
         return str(self.initial)
     def value(self, mapping):
@@ -102,3 +133,9 @@ def test():
     mapping = {var: 3}
     print "With (%s), %s = %s" % (mapping, expr, expr.value(mapping))
     print "%s" % ((p+1).value(mapping))
+
+x = Proxy('x')
+print x+x
+print x+x+x
+print x+3+2
+print 2+x+3
