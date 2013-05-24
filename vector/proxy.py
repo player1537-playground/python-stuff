@@ -54,6 +54,17 @@ class ProxyNode(object):
         if isinstance(right, ProxyNode):
             right = right.value(mapping)
         return opers[self.oper](left, right)
+    def clean(self):
+        left_is_proxynode = isinstance(self.left, ProxyNode)
+        right_is_proxynode = isinstance(self.right, ProxyNode)
+        if left_is_proxynode:
+            self.left = self.left.clean()
+        if right_is_proxynode:
+            self.right = self.right.clean()
+        if not (left_is_proxynode or right_is_proxynode):
+            if (not isinstance(self.left, Proxy)) and (not isinstance(self.right, Proxy)):
+                return self.value()
+        return self
     def __getitem__(self, index):
         return self.vals[index]
     def __len__(self):
@@ -65,13 +76,15 @@ class ProxyNode(object):
     def __radd__(self, scalar):
         return self + scalar
     def __sub__(self, other):
-        if other == 0:
-            return self
-        return ProxyNode("-", self, other)
+        return self + -other
+    #if other == 0:
+    #return self
+    #return ProxyNode("-", self, other)
     def __rsub__(self, scalar):
-        if scalar == 0:
-            return -self
-        return ProxyNode("-", scalar, self)
+        return scalar + -self
+    #if scalar == 0:
+    #return -self
+    #return ProxyNode("-", scalar, self)
     def __mul__(self, other):
         if other == 1:
             return self
@@ -147,6 +160,8 @@ class Proxy(ProxyNode):
         self.oper = None
     def __repr__(self):
         return str(self.initial)
+    def clean(self):
+        return self
     def value(self, mapping):
         if self.initial in mapping:
             return mapping[self.initial]
@@ -170,3 +185,5 @@ print x+3
 print ((1)-((((0)-((((1)-((x)*(7)))+(((0)-((x)*(0)))/(1)))*(2)))+(((1)-((((1)-((x)*(7)))+(((0)-((x)*(0)))/(1)))*(1)))/(7)))*(1)))+(((1)-((((0)-((((1)-((x)*(7)))+(((0)-((x)*(0)))/(1)))*(2)))+(((1)-((((1)-((x)*(7)))+(((0)-((x)*(0)))/(1)))*(1)))/(7)))*(7)))/(15))
 print "((1)-((((0)-((((1)-((x)*(7)))+(((0)-((x)*(0)))/(1)))*(2)))+(((1)-((((1)-((x)*(7)))+(((0)-((x)*(0)))/(1)))*(1)))/(7)))*(1)))+(((1)-((((0)-((((1)-((x)*(7)))+(((0)-((x)*(0)))/(1)))*(2)))+(((1)-((((1)-((x)*(7)))+(((0)-((x)*(0)))/(1)))*(1)))/(7)))*(7)))/(15))"
 print opers['+'], opers['*'], opers['+'] < opers['*']
+exp = ((((x*7*-1+1)*2*-1+((x*7*-1+1)*-1+1)/7)*-1+1+(((x*7*-1+1)*2*-1+((x*7*-1+1)*-1+1)/7)*7*-1+1)/15)*-1+107+((((x*7*-1+1)*2*-1+((x*7*-1+1)*-1+1)/7)*-1+1+(((x*7*-1+1)*2*-1+((x*7*-1+1)*-1+1)/7)*7*-1+1)/15)*15*-1+16)/22).clean()
+print exp.clean()
