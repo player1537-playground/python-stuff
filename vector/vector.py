@@ -105,7 +105,7 @@ print C[4]
 print C[4].value({"p": 1210, "q": 21})
 print C[2].value({"p": 314159265, "q": 100000000})
 a = Vector([3,1,4,1,5,9,2,6,5])
-print convergents(Series({ n:a[n-1] for n in xrange(1,len(a)) }, lambda s,n: s[n]))
+#print convergents(Series({ n:a[n-1] for n in xrange(1,len(a)) }, lambda s,n: s[n]))
 
 
 def test2():
